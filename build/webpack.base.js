@@ -138,6 +138,7 @@ module.exports = {
             jQuery: "jquery",
             'window.jQuery': 'jquery',
             _:'lodash'
+
         }),
         // new Webpack.DllReferencePlugin({
         //    manifest:path.resolve(__dirname,'../','manifest.json')
