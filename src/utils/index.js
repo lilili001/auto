@@ -21,12 +21,13 @@ export function getFromLS(key) {
     }
     return ls[key];
 }
-export function saveToLS(key, value) {
+export function saveToLS(key, value,otherObj) {
     if (global.localStorage) {
         global.localStorage.setItem(
             "rgl-7",
             JSON.stringify({
-                [key]: value
+                [key]: value,
+                ...otherObj
             })
         );
     }

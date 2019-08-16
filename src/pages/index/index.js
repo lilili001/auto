@@ -10,6 +10,8 @@ class Page extends Component {
         className: "layout",
         cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
         rowHeight: 30,
+        //verticalCompact:false, //垂直方向任意位置都可以 默认自动顶部对齐
+        preventCollision:true, //碰撞元素位置不移动
         breakpoints:{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
         onLayoutChange: function() {},
         initialLayout: originalLayout.length ? originalLayout :
@@ -30,7 +32,7 @@ class Page extends Component {
         this.state={
             layout: JSON.parse(JSON.stringify(originalLayout)),
             items: this.props.initialLayout ,
-            newCounter: 0
+            newCounter: getFromLS('newCounter') || 0
         };
         this.onLayoutChange = this.onLayoutChange.bind(this);
         this.onAddItem = this.onAddItem.bind(this);
@@ -38,7 +40,7 @@ class Page extends Component {
     }
 
     onLayoutChange(layout){
-        saveToLS("layout", layout);
+        saveToLS("layout", layout,{newCounter:this.state.newCounter});
         this.setState({ layout });
         this.props.onLayoutChange(layout); // updates status display
     }
