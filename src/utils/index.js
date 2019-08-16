@@ -25,9 +25,7 @@ export function saveToLS(obj) {
     if (global.localStorage) {
         global.localStorage.setItem(
             'rgl-7',
-            JSON.stringify({
-                ...obj
-            })
+            JSON.stringify(obj)
         );
     }
 }

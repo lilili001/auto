@@ -24,7 +24,7 @@ class Page extends Component {
         super(props, context);
         this.state={
             currentLayoutIndex:0,
-            layouts: originalLayout || [{'layout1': {'layout': this.props.initialLayout ,newCounter: 0  , sortOrder:0 }}]
+            layouts: originalLayout || [ {'layout0': this.props.initialLayout ,newCounter: 0  , sortOrder:0 }]
         };
         this.onAddLayout = this.onAddLayout.bind(this);
         this.onLayoutChange = this.onLayoutChange.bind(this);
@@ -37,22 +37,23 @@ class Page extends Component {
     //添加布局
     onAddLayout(){
         const len = this.state.layouts.length;
-        var newLayout = [{['layout'+(len+1)] : {layout:this.props.initialLayout ,newCounter: 0  , sortOrder:len+1 }}];
+        var newLayout = [ {['layout'+len]:this.props.initialLayout ,newCounter: 0  , sortOrder:len } ];
         var newLayouts = [ ...this.state.layouts,...newLayout];
         this.setState({layouts:newLayouts})
     }
-    onLayoutChange(layout,layouts){
-        /*const row = {'layout': layout, newCounter:this.state.layouts[this.state.currentLayoutIndex].newCounter}
-        saveToLS(  this.state.currentLayoutId , row );
-        this.resetLayouts(row,this.state.currentLayoutIndex);
-        this.props.onLayoutChange(layout); // updates status display*/
+    onLayoutChange(layout,layouts,index){
+         const {newCounter,sortOrder} = this.state.layouts[index];
+         const row = {['layout'+index ] : layout, newCounter ,sortOrder}
+         this.resetLayouts(row,index);
+         this.props.onLayoutChange(layout); // updates status display
     }
     resetLayouts(row,index){
         let oLayouts = this.state.layouts;
         oLayouts[index] = row;
         this.setState({layouts:oLayouts});
+        saveToLS(oLayouts)
     }
-    createElement(el) {
+    createElement(el,layoutIndex) {
         const removeStyle = {
             position: "absolute",
             right: "2px",
@@ -63,7 +64,7 @@ class Page extends Component {
         return (
             <div key={i} data-grid={el}>
                 {el.add ? (<span className="add text" onClick={this.onAddItem} title="You can add an item by clicking here, too.">Add +</span>) : (<span className="text">{i}</span>)}
-                <span className="remove" style={removeStyle} onClick={this.onRemoveItem.bind(this, i)}>x</span>
+                <span className="remove" style={removeStyle} onClick={this.onRemoveItem.bind(this, layoutIndex, i)}>x</span>
             </div>
         );
     }
@@ -76,29 +77,32 @@ class Page extends Component {
         });
     }
     onAddItem() {
-
-        console.log(this.state);return;
         /*eslint no-console: 0*/
-        console.log("adding", "n" + this.state.newCounter);
+        console.log("adding", "n");
         let layouts = this.state.layouts;
         var index = this.state.currentLayoutIndex;
-        var oLayout = layouts[index][this.state.currentLayoutId];
+        var oLayout = layouts[index]['layout'+index];
         var newCounter = layouts[index]['newCounter'] + 1;
         var layout = oLayout.concat({
             i: "n" + newCounter,
             x: (oLayout.length * 2) % (this.state.cols || 12),
-            y: Infinity, // puts it at the bottom
+            y: Math.floor(oLayout.length/6), // puts it at the bottom
             w: 2,
             h: 2
         });
 
-        layouts[index] = { [this.state.currentLayoutId]: layout , newCounter };
+        layouts[index] = { ['layout'+index]: layout , newCounter,sortOrder:index };
 
         this.setState(layouts);
     }
-    onRemoveItem(i) {
+    onRemoveItem(layoutIndex,i) {
+        console.log(layoutIndex)
         console.log("removing", i);
-        this.setState({ items: _.reject(this.state.items, { i: i }) });
+        const layouts = this.state.layouts;
+        var olayout = layouts[layoutIndex]['layout'+layoutIndex];
+        olayout = _.reject(olayout, { i: i });
+        layouts[layoutIndex]['layout'+layoutIndex] = olayout;
+        this.setState({layouts});
     }
     render() {
         return (
@@ -115,13 +119,13 @@ class Page extends Component {
                             {...this.props}
                             compactType={'vertical'}
                             onLayoutChange={(layout, layouts) =>{
-                                this.setState({currentLayoutIndex:index});
-                                this.onLayoutChange(layout, layouts )
+                                //this.setState({currentLayoutIndex:index});
+                                this.onLayoutChange(layout, layouts , index )
                             }
                             }
                             onBreakpointChange={this.onBreakpointChange}
                         >
-                            {_.map(layout[key]['layout'],(item)=>this.createElement(item) ) }
+                            {_.map(layout[key],(item)=>this.createElement(item,layout['sortOrder']) ) }
                         </ResponsiveReactGridLayout>
                     )
                 })}
