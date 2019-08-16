@@ -11,7 +11,6 @@ import notFound from './pages/notFound'
 const App = (props) => {
     return (
         <Router>
-            <div>
                 <Switch>
                     <Route path="/" exact component={Index} />
                     <Route path="/0-showcase"   component={showCase} />
@@ -21,7 +20,6 @@ const App = (props) => {
 
                     <Route component={notFound} />
                 </Switch>
-            </div>
         </Router>
     );
 };

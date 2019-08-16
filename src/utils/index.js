@@ -10,25 +10,36 @@ export default guid
 
 
 
-export function getFromLS(key) {
+export function getFromLS() {
     let ls = {};
     if (global.localStorage) {
         try {
-            ls = JSON.parse(global.localStorage.getItem("rgl-7")) || {};
+            ls = JSON.parse(global.localStorage.getItem('rgl-7')) || null;
         } catch (e) {
             /*Ignore*/
         }
     }
-    return ls[key];
+    return ls ;
 }
-export function saveToLS(key, value,otherObj) {
+export function saveToLS(obj) {
     if (global.localStorage) {
         global.localStorage.setItem(
-            "rgl-7",
+            'rgl-7',
             JSON.stringify({
-                [key]: value,
-                ...otherObj
+                ...obj
             })
         );
     }
+}
+export function initialLayout() {
+  return  [0, 1, 2, 3, 4].map(function(i, key, list) {
+        return {
+            i: i.toString(),
+            x: i * 2,
+            y: 0,
+            w: 2,
+            h: 2,
+            add: i === (list.length - 1).toString()
+        };
+    })
 }
