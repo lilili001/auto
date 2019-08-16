@@ -5,7 +5,6 @@ import {WidthProvider,Responsive} from 'react-grid-layout'
 import {getFromLS,saveToLS} from '@/utils/index'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayout = getFromLS("layout") || [];
-import Icon from '../../assets/images/bg@3x.png';
 class Page extends Component {
     static defaultProps = {
         className: "layout",
@@ -105,7 +104,6 @@ class Page extends Component {
         return (
             <div>
                 <button onClick={this.onAddItem}>Add Item</button>
-                <img src={Icon} alt=""/>
                 <ResponsiveReactGridLayout
                     className="layout"
                     {...this.props}
