@@ -26,7 +26,7 @@ module.exports = {
     },
     resolve:{//解析第三方模块
         modules:[path.resolve('node_modules')],
-        extensions:['.js','.css','.scss','.less','.json'],
+        extensions:['.js','.css','.scss','.less','.json','.jsx'],
         alias:{
             '@': resolve('src')
         }
@@ -51,7 +51,7 @@ module.exports = {
                 use:'expose-loader?$'
             },*/
             {
-                test:/\.js$/,
+                test:/\.js|\.jsx$/,
                 include:path.resolve(__dirname,'../src'),
                 exclude:/node_modules/,
                 use:{
@@ -61,7 +61,7 @@ module.exports = {
                             corejs: '2.0',
                             useBuiltIns:'usage'
                         }],'@babel/preset-react'],
-                        plugins:["@babel/plugin-transform-runtime"]
+                        plugins:["@babel/plugin-transform-runtime","@babel/plugin-proposal-class-properties"]
                     }
                 }
             },

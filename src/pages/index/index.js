@@ -2,58 +2,126 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash'
 import {WidthProvider,Responsive} from 'react-grid-layout'
-
+import {getFromLS,saveToLS} from '@/utils/index'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
-
+const originalLayout = getFromLS("layout") || [];
+import Icon from '../../assets/images/bg@3x.png';
 class Page extends Component {
+    static defaultProps = {
+        className: "layout",
+        cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
+        rowHeight: 30,
+        breakpoints:{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
+        onLayoutChange: function() {},
+        initialLayout: originalLayout.length ? originalLayout :
+              [0, 1, 2, 3, 4].map(function(i, key, list) {
+                return {
+                    i: i.toString(),
+                    x: i * 2,
+                    y: 0,
+                    w: 2,
+                    h: 2,
+                    add: i === (list.length - 1).toString()
+                };
+        })
+    };
+
+    constructor(props, context) {
+        super(props, context);
+        this.state={
+            layout: JSON.parse(JSON.stringify(originalLayout)),
+            items: this.props.initialLayout ,
+            newCounter: 0
+        };
+        this.onLayoutChange = this.onLayoutChange.bind(this);
+        this.onAddItem = this.onAddItem.bind(this);
+        this.onBreakpointChange = this.onBreakpointChange.bind(this);
+    }
+
     onLayoutChange(layout){
-        console.log(layout)
+        saveToLS("layout", layout);
+        this.setState({ layout });
+        this.props.onLayoutChange(layout); // updates status display
+    }
+    createElement(el) {
+        const removeStyle = {
+            position: "absolute",
+            right: "2px",
+            top: 0,
+            cursor: "pointer"
+        };
+        const i = el.add ? "+" : el.i;
+        return (
+            <div key={i} data-grid={el}>
+                {el.add ? (
+                    <span
+                        className="add text"
+                        onClick={this.onAddItem}
+                        title="You can add an item by clicking here, too."
+                    >
+            Add +
+          </span>
+                ) : (
+                    <span className="text">{i}</span>
+                )}
+                <span
+                    className="remove"
+                    style={removeStyle}
+                    onClick={this.onRemoveItem.bind(this, i)}
+                >
+          x
+        </span>
+            </div>
+        );
+    }
+    // We're using the cols coming back from this to calculate where to add new items.
+    onBreakpointChange(breakpoint, cols) {
+        this.setState({
+            breakpoint: breakpoint,
+            cols: cols
+        });
+    }
+    onAddItem() {
+        /*eslint no-console: 0*/
+        console.log("adding", "n" + this.state.newCounter);
+        this.setState({
+            // Add a new item. It must have a unique key!
+            items: this.state.items.concat({
+                i: "n" + this.state.newCounter,
+                x: (this.state.items.length * 2) % (this.state.cols || 12),
+                y: Infinity, // puts it at the bottom
+                w: 2,
+                h: 2
+            }),
+            // Increment the counter to ensure key is always unique.
+            newCounter: this.state.newCounter + 1
+        });
+    }
+    onRemoveItem(i) {
+        console.log("removing", i);
+        this.setState({ items: _.reject(this.state.items, { i: i }) });
     }
     render() {
-        const layouts = {"lg":[{"w":2,"h":3,"x":0,"y":0,"i":"1","minW":2,"minH":3,"moved":false,"static":false},{"w":2,"h":3,"x":2,"y":0,"i":"2","minW":2,"minH":3,"moved":false,"static":false},{"w":2,"h":3,"x":4,"y":0,"i":"3","minW":2,"minH":3,"moved":false,"static":false},{"w":2,"h":3,"x":6,"y":0,"i":"4","minW":2,"minH":3,"moved":false,"static":false},{"w":2,"h":3,"x":8,"y":0,"i":"5","minW":2,"minH":3,"moved":false,"static":false}]}
         return (
-            <ResponsiveReactGridLayout
-                className="layout"
-                cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-                rowHeight={30}
-                layouts={layouts}
-                onLayoutChange={(layout, layouts) =>
-                    this.onLayoutChange(layout, layouts)
-                }
-            >
-                <div key="1" data-grid={{ w: 2, h: 3, x: 0, y: 0, minW: 2, minH: 3 }}>
-                    <span className="text">1</span>
-                </div>
-                <div key="2" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
-                    <span className="text">2</span>
-                </div>
-                <div key="3" data-grid={{ w: 2, h: 3, x: 4, y: 0, minW: 2, minH: 3 }}>
-                    <span className="text">3</span>
-                </div>
-                <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-                    <span className="text">4</span>
-                </div>
-                <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-                    <span className="text">5</span>
-                </div>
-            </ResponsiveReactGridLayout>
+            <div>
+                <button onClick={this.onAddItem}>Add Item</button>
+                <img src={Icon} alt=""/>
+                <ResponsiveReactGridLayout
+                    className="layout"
+                    {...this.props}
+                    compactType={'vertical'}
+                    onLayoutChange={(layout, layouts) =>
+                        this.onLayoutChange(layout, layouts)
+                    }
+                    onBreakpointChange={this.onBreakpointChange}
+                >
+                    {_.map(this.state.items,(item,i)=>this.createElement(item) ) }
+                </ResponsiveReactGridLayout>
+            </div>
         );
     }
 }
 
-function generateLayout() {
-    return _.map(_.range(0, 25), function(item, i) {
-        var y = Math.ceil(Math.random() * 4) + 1;
-        return {
-            y: (_.random(0, 5) * 2) % 12,
-            x: Math.floor(i / 6) * y,
-            w: 2,
-            h: y,
-            i: i.toString(),
-            static: Math.random() < 0.05
-        };
-    });
-}
 
 function mapStateToProps(state) {
     return {};
