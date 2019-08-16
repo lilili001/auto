@@ -61,7 +61,11 @@ module.exports = {
                             corejs: '2.0',
                             useBuiltIns:'usage'
                         }],'@babel/preset-react'],
-                        plugins:["@babel/plugin-transform-runtime","@babel/plugin-proposal-class-properties"]
+                        plugins:["@babel/plugin-transform-runtime","@babel/plugin-proposal-class-properties",
+                            ["import", {"libraryName": "antd", "libraryDirectory": "es", "style": "css"},'ant'],
+                            ["import", {"libraryName": "lodash", "libraryDirectory": "", "camel2DashComponentName":false},'lodash'],
+                            ["import", {"libraryName": "jquery", "libraryDirectory": "", "camel2DashComponentName":false},'jquery'],
+                        ]
                     }
                 }
             },

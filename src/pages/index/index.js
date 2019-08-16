@@ -5,6 +5,9 @@ import {WidthProvider,Responsive} from 'react-grid-layout'
 import {getFromLS,saveToLS} from '@/utils/index'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayout = getFromLS("layout") || [];
+
+import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon } from 'antd';
+
 class Page extends Component {
     static defaultProps = {
         className: "layout",
@@ -77,6 +80,7 @@ class Page extends Component {
     }
     // We're using the cols coming back from this to calculate where to add new items.
     onBreakpointChange(breakpoint, cols) {
+        console.log(breakpoint,cols)
         this.setState({
             breakpoint: breakpoint,
             cols: cols
@@ -121,7 +125,6 @@ class Page extends Component {
         );
     }
 }
-
 
 function mapStateToProps(state) {
     return {};
