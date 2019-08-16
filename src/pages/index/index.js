@@ -13,7 +13,7 @@ class Page extends Component {
         className: "layout",
         cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
         rowHeight: 30,
-        //verticalCompact:false, //垂直方向任意位置都可以 默认自动顶部对齐
+        verticalCompact:false, //垂直方向任意位置都可以 默认自动顶部对齐
         preventCollision:true, //碰撞元素位置不移动
         breakpoints:{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
         onLayoutChange: function() {},
