@@ -35,7 +35,7 @@ class ShowcaseLayout extends React.Component {
               Static - {i}
             </span>
           ) : (
-            <span className="text">{i}</span>
+            <span className="text">{i}-{l.test}</span>
           )}
         </div>
       );
@@ -68,6 +68,7 @@ class ShowcaseLayout extends React.Component {
   };
 
   render() {
+    console.log(this.state.layouts)
     return (
       <div>
         <div>
@@ -115,7 +116,8 @@ function generateLayout() {
       w: 2,
       h: y,
       i: i.toString(),
-      static: Math.random() < 0.05
+      static: Math.random() < 0.05,
+      test:'test'+i.toString()
     };
   });
 }
