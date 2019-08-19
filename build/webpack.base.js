@@ -72,7 +72,7 @@ module.exports = {
             {
                 test: /\.css$/,
                 //exclude:/node_modules/,
-                use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
+                use: [MiniCssExtractPlugin.loader, 'css-loader?modules', 'postcss-loader']
             },
             {
                 test: /\.less/,

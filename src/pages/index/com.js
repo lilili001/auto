@@ -2,9 +2,10 @@
  * Created by miyaye on 2019/8/16.
  */
 export default {
-    formItem:{
+    formItems:{
         //input
         input:{
+            configurable:true,
             type: 'input',
             label:'',
             key:'',
@@ -24,6 +25,7 @@ export default {
         },
         //select
         select:{
+            configurable:true,
             type: 'select',
             label:'',
             key:'',
@@ -47,16 +49,23 @@ export default {
                     label: '韶关',
                     value: 'shaoguan'
                 },
-            ]
+            ],
         },
         //date
         date:{
+            configurable:true,
             type: 'date',
             label:'',
             key:'',
             props: {
-                type: 'date'
-            }
-        }
+
+            },
+        },
+    },
+    grid:{
+        configurable:true,
+        type:'grid',
+        column:0,
+        slots:[]
     }
 }

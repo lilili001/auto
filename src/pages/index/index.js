@@ -5,9 +5,13 @@ import {WidthProvider,Responsive} from 'react-grid-layout'
 import {getFromLS,saveToLS,initialLayout,guid ,formItemLayout,tailFormItemLayout } from '@/utils/index'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayout = getFromLS("rgl-7") ;
-import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon } from 'antd';
-class Page extends Component {
+import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon , Tabs } from 'antd';
+import {onAddLayout, onAddItem, onLayoutChange, onRemoveItem} from "@/pages/index/actions/func";
+import {createElement} from "@/pages/index/actions/createEle";
+import ComponentList from './partials/comList';
+const { TabPane } = Tabs;
 
+class Page extends Component {
     static defaultProps = {
         className: "layout",
         cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
@@ -26,30 +30,17 @@ class Page extends Component {
             currentGridIndex:null, //当前grid 的 index
             currentItem:null,//当前选中的对象
             //layouts: originalLayout || [ {'layout0': this.props.initialLayout ,newCounter: 0  , sortOrder:0 }]
-            layouts:[]
+            layouts: originalLayout || []
         };
         this.onAddLayout = this.onAddLayout.bind(this);
         this.onLayoutChange = this.onLayoutChange.bind(this);
         this.onAddItem = this.onAddItem.bind(this);
         this.onBreakpointChange = this.onBreakpointChange.bind(this);
+        this.tabChange = this.tabChange.bind(this);
     }
-    componentDidMount(){
-        //console.log(this.state.currentLayoutId)
-    }
+    componentDidMount(){}
     //添加布局
-    onAddLayout(){
-        const len = this.state.layouts.length;
-        //var newLayout = [ {['layout'+len]:this.props.initialLayout ,newCounter: 0  , sortOrder:len } ];
-        var newLayout = [ {['layout'+len]:[] ,newCounter: 0  , sortOrder:len } ];
-        var newLayouts = [ ...this.state.layouts,...newLayout];
-        this.setState({layouts:newLayouts , currentLayoutIndex:len });
-    }
-
-    //设置当前这个grid有设置信息
-    onShowSettings(item){
-        //this.setState({currentItem:item})
-    }
-
+    onAddLayout=()=> onAddLayout(this)
     // We're using the cols coming back from this to calculate where to add new items.
     onBreakpointChange(breakpoint, cols) {
         this.setState({
@@ -57,83 +48,18 @@ class Page extends Component {
             cols: cols
         });
     }
-    onAddItem(type) {
-        //此处可根据类型来判断所要添加的组件属性
-        /*eslint no-console: 0*/
-        console.log("adding", "n");
-        let layouts = this.state.layouts;
-        var index = this.state.currentLayoutIndex;
-        var oLayout = layouts[index]['layout'+index];
-        var newCounter = layouts[index]['newCounter'] + 1;
-        const uuid = guid();
-        var layout = oLayout.concat({
-            i:uuid,
-            x: (oLayout.length * 2) % (this.state.cols || 12),
-            y: Math.floor(oLayout.length/6), // puts it at the bottom
-            w: 2,
-            h: 2,
-            test:'test'+uuid,
-            column:0,
-            attributes:{
-
-            },
-            slots:'',
-            info:{
-                i: "n" + newCounter,
-                isTarget:true,//是否能拖组件进来 初始化为true, 但是如果column>0的话 就不可以拖拽组件进来, 他的子组件也是grid,但是没有位置属性
-            }
-        });
-        layouts[index] = { ['layout'+index]: layout , newCounter,sortOrder:index };
-        this.setState({layouts,currentItem:layout[0]});
-        saveToLS(layouts);
-        return uuid
-    }
-    createElement(el,layoutIndex) {
-        const removeStyle = {
-            position: "absolute",
-            right: "2px",
-            top: 0,
-            cursor: "pointer"
-        };
-        const i = el.add ? "+" : el.i;
-        return (
-            <div key={i} id={i} data-grid={el} onClick={this.onShowSettings.bind(this,el)}>
-                {el.add ? (<span className="add text" onClick={this.onAddItem} title="You can add an item by clicking here, too.">Add +</span>) : (<span className="text">{i}-{el.test}</span>)}
-                <span className="remove" style={removeStyle} onClick={this.onRemoveItem.bind(this, layoutIndex, i)}>x</span>
-            </div>
-        );
-    }
-    onLayoutChange(layout,layouts,index){
-        const {currentItem} = this.state;
-        const laLayout = Object.assign({},currentItem,layout[0]);
-        var orgLayouts = this.state.layouts;
-
-        this.setState({currentItem: laLayout});
-        this.onRemoveItem(index,layout.i,()=>{
-            console.log(this.state.layouts)
-        });
-
-        saveToLS(this.state.layouts);
-        //this.props.onLayoutChange(layout); // updates status display
-    }
-    resetLayouts(){
-        saveToLS(this.state.layouts);
-    }
-    onRemoveItem(layoutIndex,i,cb) {
-        const layouts = this.state.layouts;
-        var olayout = layouts[layoutIndex]['layout'+layoutIndex];
-        olayout = _.reject(olayout, { i: i });
-        layouts[layoutIndex]['layout'+layoutIndex] = olayout;
-        this.setState({layouts}, ()=> {
-            cb && cb()
-        });
-    }
+    onAddItem = (type)=> onAddItem(this,type);
+    createElement = (el,layoutIndex) => createElement(this, el,layoutIndex)
+    onLayoutChange= (layout,layouts,index)=> onLayoutChange(this,layout,layouts,index);
+    onRemoveItem = (layoutIndex,i) => onRemoveItem(this,layoutIndex,i);
+    tabChange(){}
     render() {
         var obj = this.state.currentItem ;
         if(!!obj){
-            var keys = Object.keys(obj);
+            var keys = Object.keys(obj  )   ;
+            if(obj['attributes']) keys = Object.keys(obj['attributes']);
+            if(obj['info']) var infoKeys = Object.keys(obj['info']);
         }
-
         return (
             <div className="content">
                 <nav className="navbar" role="navigation" aria-label="main navigation">
@@ -149,17 +75,34 @@ class Page extends Component {
                         </a>
                     </div>
                 </nav>
+
                 <div className="columns">
                     <div className="column is-one-fifth" style={{borderRight:"1px solid #000"}}>
-                        <Form {...formItemLayout}>
-                        {!!keys && keys.map(key=>{
-                            const value = obj[key];
-                            return (
-                                    <Form.Item key={key} className="Item" label={key}><Input defaultValue={value}/></Form.Item>
-                            )
-                        }) }
-                        </Form>
+                    <Tabs defaultActiveKey="1" onChange={this.tabChange}>
+                        <TabPane tab="组件列表" key="1">
+                             <ComponentList></ComponentList>
+                        </TabPane>
+                        <TabPane tab="当前组件配置" key="2">
+                                <div>Info</div>
+                                {!!infoKeys && infoKeys.map(key=>{
+                                    const value = obj[key];
+                                    return (
+                                        <Form.Item key={key} className="Item" label={key}><Input defaultValue={value}/></Form.Item>
+                                    )
+                                }) }
+                                <div>Attributes</div>
+                                <Form {...formItemLayout}>
+                                    {!!keys && keys.map(key=>{
+                                        const value = obj[key];
+                                        return (
+                                            <Form.Item key={key} className="Item" label={key}><Input defaultValue={value}/></Form.Item>
+                                        )
+                                    }) }
+                                </Form>
+                        </TabPane>
+                    </Tabs>
                     </div>
+
                     <div className="column">
                         <button onClick={this.onAddLayout}>添加layout</button>
                         <button onClick={this.onAddItem}>Add Item</button>
@@ -188,11 +131,9 @@ class Page extends Component {
         );
     }
 }
-
 function mapStateToProps(state) {
     return {};
 }
-
 export default connect(
     mapStateToProps,
 )(Page);
