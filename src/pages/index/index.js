@@ -5,7 +5,7 @@ import {WidthProvider,Responsive} from 'react-grid-layout'
 import {getFromLS,saveToLS,initialLayout,guid ,formItemLayout,tailFormItemLayout } from '@/utils/index'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayout = getFromLS("rgl-7") ;
-import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon , Tabs } from 'antd';
+import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon , Tabs  } from 'antd';
 import {onAddLayout, onAddItem, onLayoutChange, onRemoveItem} from "@/pages/index/actions/func";
 import {createElement} from "@/pages/index/actions/createEle";
 import ComponentList from './partials/comList';
@@ -27,7 +27,6 @@ class Page extends Component {
         super(props, context);
         this.state={
             currentLayoutIndex:0, //当前布局的index
-            currentGridIndex:null, //当前grid 的 index
             currentItem:null,//当前选中的对象
             //layouts: originalLayout || [ {'layout0': this.props.initialLayout ,newCounter: 0  , sortOrder:0 }]
             layouts: originalLayout || []
@@ -37,6 +36,10 @@ class Page extends Component {
         this.onAddItem = this.onAddItem.bind(this);
         this.onBreakpointChange = this.onBreakpointChange.bind(this);
         this.tabChange = this.tabChange.bind(this);
+        this.dropIntoLayout = this.dropIntoLayout.bind(this);
+        this.changeInput = this.changeInput.bind(this);
+        this.drop = this.drop.bind(this)
+        this.dragEnter = this.dragEnter.bind(this)
     }
     componentDidMount(){}
     //添加布局
@@ -48,34 +51,69 @@ class Page extends Component {
             cols: cols
         });
     }
-    onAddItem = (type)=> onAddItem(this,type);
+    onAddItem = (type,pid)=> onAddItem(this,type,pid);
     createElement = (el,layoutIndex) => createElement(this, el,layoutIndex)
     onLayoutChange= (layout,layouts,index)=> onLayoutChange(this,layout,layouts,index);
     onRemoveItem = (layoutIndex,i) => onRemoveItem(this,layoutIndex,i);
 
     dragStart(obj){
-        event.target.style.background = '#f8f8f8';
+        event.target.style.background = 'yellow';
         event.dataTransfer.setData('item',JSON.stringify(obj));
     }
     dragEnd(){
         event.target.style.background = 'white';
     }
-    //目标container
+    //目标 grid
     dragEnter(ev){
+        this.setState({currentItem:JSON.parse(ev.target.getAttribute('item'))})
         ev.preventDefault();
+        event.stopPropagation();
         ev.target.style.background = '#d7e6f3'
     }
     dragLeave(ev){
-        ev.target.style.background = '#fff'
+        ev.preventDefault();
+        //ev.target.style.background = '#fff'
     }
     drop(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        var obj = JSON.parse(ev.dataTransfer.getData('item'));
         ev.target.style.background = '#ddd';
+        if(this.state.currentItem.type!=='grid'){
+              message.error('禁止拖拽');
+        }else{
+            if(obj.type=='grid'){
+                this.onAddItem('grid' , this.state.currentItem.i ) ;
+            }
+        }
+    }
+    //拖到大区域 layout中
+    dragEnterLayout(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+       // ev.target.style.background = '#ecf5ca';
+    }
+    dropIntoLayout(ev){
+        ev.stopPropagation();
         ev.preventDefault();
         var obj = JSON.parse(ev.dataTransfer.getData('item'));
-        console.log(obj);
+        if(obj.type!=='grid'){
+            message.error('当前区域仅允许拖拽grid组件');
+            ev.target.style.background = '#fff';
+            return;
+        }
+        this.onAddItem('grid');
+        ev.target.style.background = '#fff';
     }
     changeInput(ev){
-
+        const {currentItem} = this.state;
+        currentItem['attributes'][ev.target.name] = ev.target.value;
+        currentItem['slots'].length = [];
+        if(ev.target.name=='column' && ev.target.value > 1 ){
+            for(let i=0;i<ev.target.value;i++){
+                this.onAddItem('grid' , this.state.currentItem.i ) ;
+            }
+        }
     }
     tabChange(){}
     render() {
@@ -110,20 +148,20 @@ class Page extends Component {
                         <TabPane tab="当前组件配置" key="2">
                                 <div><b>Info</b></div>
                                 {!!infoKeys && infoKeys.map(key=>{
-                                    const value = obj[key];
+                                    const value = obj['info'][key];
                                     return (
                                         <div className="row" key={key} >
-                                            <label htmlFor=""><span className="label60">{key}</span><input onChange={this.changeInput} value={value}/></label>
+                                            <label htmlFor=""><span className="label60">{key}</span><input  disabled value={value}/></label>
                                         </div>
                                     )
                                 }) }
                                 <div><b>Attributes</b></div>
                                 <Form {...formItemLayout}>
                                     {!!keys && keys.map(key=>{
-                                        const value = obj[key];
+                                        const value = obj['attributes'][key];
                                         return (
                                             <div className="row" key={key}>
-                                                <label  htmlFor=""><span className="label60">{key}</span><input onChange={this.changeInput} value={value}/></label>
+                                                <label htmlFor=""><span className="label60">{key}</span><input name={key} onChange={this.changeInput} value={value}/></label>
                                             </div>
                                         )
                                     }) }
@@ -134,12 +172,20 @@ class Page extends Component {
 
                     <div className="column">
                         <button onClick={this.onAddLayout}>添加layout</button>
-                        <button onClick={this.onAddItem}>Add Item</button>
-                        {_.map(this.state.layouts,(layout,index)=>{
+                        {/*<button onClick={this.onAddItem}>Add Item</button>*/}
+                        {this.state.layouts.length == 0 ?   ( <div className="color666">还没有布局, 请 先添加布局</div> ) :
+                         _.map(this.state.layouts,(layout,index)=>{
                             const key = Object.keys(layout)[0];
+                            const grids = _.filter(layout[key],item=> item.parentId==null)
                             return (
+                                <div  onDragEnter={this.dragEnterLayout}
+                                      onDragOver={this.dragEnterLayout}
+                                      onDragLeave={this.dragLeave}
+                                      onDrop={this.dropIntoLayout}
+                                      key={key}
+                                      className="wrapper"
+                                >
                                 <ResponsiveReactGridLayout
-                                    key={key}
                                     className="layout"
                                     {...this.props}
                                     compactType={'vertical'}
@@ -150,10 +196,12 @@ class Page extends Component {
                                     }
                                     onBreakpointChange={this.onBreakpointChange}
                                 >
-                                    {_.map(layout[key],(item)=>this.createElement(item,layout['sortOrder']) ) }
+                                    {_.map(grids,(item)=> this.createElement(item,layout['sortOrder'])   ) }
                                 </ResponsiveReactGridLayout>
+                                </div>
                             )
-                        })}
+                        })
+                        }
                     </div>
                 </div>
             </div>

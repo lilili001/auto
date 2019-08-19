@@ -6,4 +6,9 @@ body{
   .content ul{margin-left:0}
   .row{margin-bottom:10px;}
   .label60{width:60px; display: inline-block;text-align: right;padding-right:10px; }
+  .active{border:1px solid red}
+  .color666{color:#666}
+  .grid-item{border:1px solid #000;height:100%;
+    >div{height:100%}}
+  .ant-row{padding:10px;}
 }

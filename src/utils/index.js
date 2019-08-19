@@ -68,3 +68,13 @@ export const tailFormItemLayout = {
         },
     },
 };
+/**取消冒泡**/
+export function stopPro (e) {
+    if (e && e.stopPropagation) {
+        //W3C取消冒泡事件
+        e.stopPropagation();
+    } else {
+        //IE取消冒泡事件
+        window.event.cancelBubble = true;
+    }
+}

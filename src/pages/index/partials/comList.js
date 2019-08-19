@@ -32,7 +32,7 @@ class ComponentList extends Component {
 }
 
 function mapStateToProps(state) {
-    console.log(state)
+    //console.log(state)
     return {};
 }
 

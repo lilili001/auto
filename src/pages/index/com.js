@@ -5,10 +5,8 @@ export default {
     formItems:{
         //input
         input:{
-            configurable:true,
             type: 'input',
-            label:'',
-            key:'',
+            parentId:null,
             props: {
                 disabled:false,
                 placeholder: '普通的input',
@@ -16,7 +14,10 @@ export default {
                 clearable: true,
                 icon: '',
             },
-            slot:'this is slot',
+            attributes:{
+                label:'',
+                key:'',
+            },
             events:{
                 'on-click':()=>{alert('click')},
                 'on-change':()=>{alert('change')},
@@ -25,17 +26,18 @@ export default {
         },
         //select
         select:{
-            configurable:true,
             type: 'select',
-            label:'',
-            key:'',
+            parentId:null,
             props: {
                 placeholder: '普通的select',
                 size: 'small',
                 clearable: true,
                 icon: '',
             },
-            slot:'this is slot',
+            attributes:{
+                label:'',
+                key:'',
+            },
             events:{
                 'on-change':()=>{alert('change')},
             },
@@ -53,19 +55,23 @@ export default {
         },
         //date
         date:{
-            configurable:true,
             type: 'date',
-            label:'',
-            key:'',
+            parentId:null,
+            attributes:{
+                label:'',
+                key:'',
+            },
             props: {
 
             },
         },
     },
     grid:{
-        configurable:true,
         type:'grid',
-        column:0,
-        slots:[]
+        parentId:null,
+        slots:[],
+        attributes:{
+            column:0
+        }
     }
 }
