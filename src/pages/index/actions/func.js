@@ -42,13 +42,13 @@ export function  onRemoveItem(that,layoutIndex,i) {
     const layouts = that.state.layouts;
     var olayout = layouts[layoutIndex]['layout'+layoutIndex];
     olayout = _.reject(olayout, { i: i });
-    console.log(olayout)
     layouts[layoutIndex]['newCounter']--;
     layouts[layoutIndex]['layout'+layoutIndex] = olayout;
     that.setState({layouts,currentItem:null});
 } 
 export function onLayoutChange(that,layout,layouts,index){
-    if(layout.length == 0) return;
+    if(event==null) return;
+    if(layout.length == 0   ) return;
     const {currentItem} = that.state;
 
     const laLayout = Object.assign({},currentItem,layout[0]);

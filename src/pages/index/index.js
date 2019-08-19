@@ -40,7 +40,7 @@ class Page extends Component {
     }
     componentDidMount(){}
     //添加布局
-    onAddLayout=()=> onAddLayout(this)
+    onAddLayout=()=> onAddLayout(this);
     // We're using the cols coming back from this to calculate where to add new items.
     onBreakpointChange(breakpoint, cols) {
         this.setState({
@@ -52,6 +52,31 @@ class Page extends Component {
     createElement = (el,layoutIndex) => createElement(this, el,layoutIndex)
     onLayoutChange= (layout,layouts,index)=> onLayoutChange(this,layout,layouts,index);
     onRemoveItem = (layoutIndex,i) => onRemoveItem(this,layoutIndex,i);
+
+    dragStart(obj){
+        event.target.style.background = '#f8f8f8';
+        event.dataTransfer.setData('item',JSON.stringify(obj));
+    }
+    dragEnd(){
+        event.target.style.background = 'white';
+    }
+    //目标container
+    dragEnter(ev){
+        ev.preventDefault();
+        ev.target.style.background = '#d7e6f3'
+    }
+    dragLeave(ev){
+        ev.target.style.background = '#fff'
+    }
+    drop(ev){
+        ev.target.style.background = '#ddd';
+        ev.preventDefault();
+        var obj = JSON.parse(ev.dataTransfer.getData('item'));
+        console.log(obj);
+    }
+    changeInput(ev){
+
+    }
     tabChange(){}
     render() {
         var obj = this.state.currentItem ;
@@ -77,25 +102,29 @@ class Page extends Component {
                 </nav>
 
                 <div className="columns">
-                    <div className="column is-one-fifth" style={{borderRight:"1px solid #000"}}>
-                    <Tabs defaultActiveKey="1" onChange={this.tabChange}>
+                    <div className="column is-one-fifth" style={{borderRight:"1px solid #000","paddingLeft":"20px"}}>
+                    <Tabs defaultActiveKey="2" onChange={this.tabChange} >
                         <TabPane tab="组件列表" key="1">
-                             <ComponentList></ComponentList>
+                             <ComponentList dragStart={this.dragStart} dragEnd={this.dragEnd}></ComponentList>
                         </TabPane>
                         <TabPane tab="当前组件配置" key="2">
-                                <div>Info</div>
+                                <div><b>Info</b></div>
                                 {!!infoKeys && infoKeys.map(key=>{
                                     const value = obj[key];
                                     return (
-                                        <Form.Item key={key} className="Item" label={key}><Input defaultValue={value}/></Form.Item>
+                                        <div className="row" key={key} >
+                                            <label htmlFor=""><span className="label60">{key}</span><input onChange={this.changeInput} value={value}/></label>
+                                        </div>
                                     )
                                 }) }
-                                <div>Attributes</div>
+                                <div><b>Attributes</b></div>
                                 <Form {...formItemLayout}>
                                     {!!keys && keys.map(key=>{
                                         const value = obj[key];
                                         return (
-                                            <Form.Item key={key} className="Item" label={key}><Input defaultValue={value}/></Form.Item>
+                                            <div className="row" key={key}>
+                                                <label  htmlFor=""><span className="label60">{key}</span><input onChange={this.changeInput} value={value}/></label>
+                                            </div>
                                         )
                                     }) }
                                 </Form>
