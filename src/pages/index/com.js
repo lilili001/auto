@@ -14,9 +14,11 @@ export default {
                 clearable: true,
                 icon: '',
             },
+            isDraggable: false,
+            isResizable: false,
             attributes:{
-                label:'',
-                key:'',
+                label:'测试的label',
+                key:'test',
             },
             events:{
                 'on-click':()=>{alert('click')},
@@ -35,9 +37,11 @@ export default {
                 icon: '',
             },
             attributes:{
-                label:'',
-                key:'',
+                label:'测试的label',
+                key:'test',
             },
+            isDraggable: false,
+            isResizable: false,
             events:{
                 'on-change':()=>{alert('change')},
             },
@@ -58,9 +62,11 @@ export default {
             type: 'date',
             parentId:null,
             attributes:{
-                label:'',
-                key:'',
+                label:'测试的label',
+                key:'test',
             },
+            isDraggable: false,
+            isResizable: false,
             props: {
 
             },
@@ -71,7 +77,9 @@ export default {
         parentId:null,
         slots:[],
         attributes:{
-            column:0
+            column:0,
+            isForm:true,
+            span:6
         }
     }
 }

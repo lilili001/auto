@@ -8,7 +8,6 @@ body{
   .label60{width:60px; display: inline-block;text-align: right;padding-right:10px; }
   .active{border:1px solid red}
   .color666{color:#666}
-  .grid-item{border:1px solid #000;height:100%;
-    >div{height:100%}}
+  .grid-item{border:1px solid #000;  .grid{min-height: 30px} }
   .ant-row{padding:10px;}
 }

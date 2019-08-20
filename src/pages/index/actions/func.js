@@ -43,7 +43,7 @@ export function onAddItem(that ,type,pid) {
         i:uuid,
         x: (oLayout.length * 2) % (that.state.cols || 12),
         y: Math.floor(oLayout.length/6), // puts it at the bottom
-        w: 2,
+        w: 12,
         h: 2,
         attributes:{},
         slots:[],
@@ -57,7 +57,7 @@ export function onAddItem(that ,type,pid) {
     that.setState({layouts,currentItem:layout[0]});
     saveToLS(layouts);
 }
-export function  onRemoveItem(that,layoutIndex,i) {
+export function onRemoveItem(that,layoutIndex,i) {
     stopPro(event);
     const layouts = that.state.layouts;
     var olayout = layouts[layoutIndex]['layout'+layoutIndex];
@@ -68,6 +68,8 @@ export function  onRemoveItem(that,layoutIndex,i) {
         }
     });
     olayout = _.reject(olayout, { i: i });
+    //删除所有的子item
+    olayout = _.reject(olayout,{parentId:i});
     layouts[layoutIndex]['newCounter']--;
     layouts[layoutIndex]['layout'+layoutIndex] = olayout;
     that.setState({layouts,currentItem:null});
@@ -75,17 +77,17 @@ export function  onRemoveItem(that,layoutIndex,i) {
 } 
 export function onLayoutChange(that,layout,layouts,index){
     if(event==null) return;
-    if(layout.length == 0  || !layout[0]['attributes']  ) return;
-    const {currentItem} = that.state;
-
-    const laLayout = Object.assign({},currentItem,layout[0]);
+    if( layout.length == 0 ) return;
     var orgLayouts = that.state.layouts;
-    that.setState({currentItem: laLayout});
+    var oLayout = orgLayouts[index]['layout'+index];
+    var currentItemId = layout[0]['i'];
+    var currentItem = _.find(oLayout,{i:currentItemId});
+    var laIndex = _.findIndex(oLayout, {i:currentItemId});
 
-    //更新 layouts
-    const layoutArr = orgLayouts[index]['layout'+index];
-    let laIndex = _.findIndex(layoutArr, {i:laLayout.i});
-    orgLayouts[index]['layout'+index][laIndex] = laLayout;
-    saveToLS(that.state.layouts);
+    currentItem = Object.assign({},currentItem,layout[0]);
+    that.setState({currentItem: currentItem});
+
+    orgLayouts[index]['layout'+index][laIndex] = currentItem;
+    saveToLS(orgLayouts);
     //that.props.onLayoutChange(layout); // updates status display
 } 

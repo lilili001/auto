@@ -6,6 +6,7 @@ import {getFromLS,saveToLS,initialLayout,guid ,formItemLayout,tailFormItemLayout
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayout = getFromLS("rgl-7") ;
 import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon , Tabs  } from 'antd';
+import Header from './partials/header'
 import {onAddLayout, onAddItem, onLayoutChange, onRemoveItem} from "@/pages/index/actions/func";
 import {createElement} from "@/pages/index/actions/createEle";
 import ComponentList from './partials/comList';
@@ -16,9 +17,10 @@ class Page extends Component {
     static defaultProps = {
         className: "layout",
         cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
+        isDraggable:false,
         rowHeight: 30,
         compactType:false, //垂直方向任意位置都可以 默认自动顶部对齐
-        preventCollision:true, //碰撞元素位置不移动
+        preventCollision:false, //碰撞元素位置不移动
         breakpoints:{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
         onLayoutChange: function() {},
         initialLayout: initialLayout(),
@@ -27,6 +29,7 @@ class Page extends Component {
     constructor(props, context) {
         super(props, context);
         this.state={
+            activeKey:'2',
             currentLayoutIndex:0, //当前布局的index
             currentItem:null,//当前选中的对象
             //layouts: originalLayout || [ {'layout0': this.props.initialLayout ,newCounter: 0  , sortOrder:0 }]
@@ -42,6 +45,7 @@ class Page extends Component {
         this.drop = this.drop.bind(this)
         this.dragEnter = this.dragEnter.bind(this)
     }
+
     componentDidMount(){}
     //添加布局
     onAddLayout=()=> onAddLayout(this);
@@ -66,12 +70,14 @@ class Page extends Component {
     }
     //目标 grid
     dragEnter(ev){
-         if(ev.target){
-             console.log(ev.target,ev.target.getAttribute('item'));
-             this.setState({currentItem:JSON.parse(ev.target.getAttribute('item'))})
-         }
+        var i = ev.target.getAttribute('i');
+        var index = this.state.currentLayoutIndex
+        var item = _.find(this.state.layouts[index]['layout'+index],{i});
         ev.preventDefault();
-        //stopPro(event)
+        stopPro(ev)
+         if(ev.target){
+             this.setState({currentItem: item})
+         }
         ev.target.style.background = '#d7e6f3'
     }
     dragLeave(ev){
@@ -87,9 +93,7 @@ class Page extends Component {
         if(this.state.currentItem.type!=='grid'){
               message.error('禁止拖拽');
         }else{
-            if(obj.type=='grid'){
-                this.onAddItem('grid' , this.state.currentItem.i ) ;
-            }
+            this.onAddItem(obj.type , this.state.currentItem.i ) ;
         }
     }
     //拖到大区域 layout中
@@ -111,16 +115,22 @@ class Page extends Component {
         ev.target.style.background = '#fff';
     }
     changeInput(ev){
+        console.log('sdf')
         const {currentItem} = this.state;
         currentItem['attributes'][ev.target.name] = ev.target.value;
-        currentItem['slots'].length = [];
+        this.setState({currentItem});
+
+        //currentItem['slots'].length = [];
         if(ev.target.name=='column' && ev.target.value > 1 ){
             for(let i=0;i<ev.target.value;i++){
                 this.onAddItem('grid' , this.state.currentItem.i ) ;
             }
         }
     }
-    tabChange(){}
+    tabChange(index){
+        console.log(index)
+        this.setState({activeKey:index})
+    }
     render() {
         var obj = this.state.currentItem ;
         if(!!obj){
@@ -130,23 +140,11 @@ class Page extends Component {
         }
         return (
             <div className="content">
-                <nav className="navbar" role="navigation" aria-label="main navigation">
-                    <div className="navbar-brand">
-                        <a className="navbar-item" href="https://bulma.io">
-                            <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: Free, open source, & modern CSS framework based on Flexbox" width="112" height="28"/>
-                        </a>
-
-                        <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false">
-                            <span aria-hidden="true"></span>
-                            <span aria-hidden="true"></span>
-                            <span aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </nav>
+                <Header></Header>
 
                 <div className="columns">
                     <div className="column is-one-fifth" style={{borderRight:"1px solid #000","paddingLeft":"20px"}}>
-                    <Tabs defaultActiveKey="2" onChange={this.tabChange} >
+                    <Tabs defaultActiveKey="2" activeKey={this.state.activeKey} onChange={this.tabChange} >
                         <TabPane tab="组件列表" key="1">
                              <ComponentList dragStart={this.dragStart} dragEnd={this.dragEnd}></ComponentList>
                         </TabPane>
@@ -166,7 +164,7 @@ class Page extends Component {
                                         const value = obj['attributes'][key];
                                         return (
                                             <div className="row" key={key}>
-                                                <label htmlFor=""><span className="label60">{key}</span><input name={key} onChange={this.changeInput} value={value}/></label>
+                                                <label><span className="label60">{key}</span><input name={key} onChange={this.changeInput.bind(this)} value={value}/></label>
                                             </div>
                                         )
                                     }) }
@@ -216,6 +214,6 @@ class Page extends Component {
 function mapStateToProps(state) {
     return {};
 }
-export default connect(
+export default Form.create()(connect(
     mapStateToProps,
-)(Page);
+)(Page));
