@@ -37,14 +37,14 @@ export function createElement(that, el, layoutIndex) {
         return gridSlots.map((slot)=>{
             const orgLayouts = that.state.layouts[layoutIndex]['layout' + layoutIndex];
             var item = _.find(orgLayouts, {i: slot});
-            if(item.slots.length){
+            if(!!item && item.slots.length){
                 return (<Col span={24/gridSlots.length} className="grid-item" key={slot} data-grid={item}>
                     <div className={that.state.currentItem && that.state.currentItem['i'] == slot ? 'active' : ''}
                          key={slot} id={slot} item={JSON.stringify(item)} onDragEnter={that.dragEnter} onDragOver={that.dragEnter}
                          onDragLeave={that.dragLeave} onDrop={that.drop} onClick={(ev)=>setCurrentItem(ev,item)}>
                         {(<div className="text" >{slot}</div>)}
                         <span className="remove" style={removeStyle} onClick={that.onRemoveItem.bind(that, layoutIndex, slot)}>x</span>
-                        {getGridNodes(item.slots)}
+                        { item && item.slots ?  getGridNodes(item.slots) : ''}
                     </div>
                 </Col>)
             }else{
@@ -65,7 +65,7 @@ export function createElement(that, el, layoutIndex) {
     return <Row className={that.state.currentItem && that.state.currentItem['i'] == i ? 'active' : ''} key={i} id={i}
                         data-grid={el} onDragEnter={that.dragEnter} onDragOver={that.dragEnter} onDragLeave={that.dragLeave}
                         onDrop={that.drop} onClick={(ev)=>setCurrentItem(ev,el)}>
-        {getGridNodes(el.slots)}
+        { !!el ?  getGridNodes(el.slots) : ''}
         {/*{(<span className="text">{i}</span>)}*/}
         <span className="remove" style={removeStyle} onClick={that.onRemoveItem.bind(that, layoutIndex, i)}>x</span>
     </Row>

@@ -1,5 +1,6 @@
 import {guid, saveToLS} from "@/utils/index";
 import coms from '../com'
+import {stopPro} from "@/utils";
 
 export function onAddLayout(that){
     const len = that.state.layouts.length;
@@ -59,9 +60,15 @@ export function onAddItem(that ,type,pid) {
     return uuid
 }
 export function  onRemoveItem(that,layoutIndex,i) {
-    event.stopPropagation();
+    stopPro(event);
     const layouts = that.state.layouts;
     var olayout = layouts[layoutIndex]['layout'+layoutIndex];
+    //删除父item中的slots
+    olayout.map(item=>{
+        if(item.slots.indexOf(i) !=-1){
+            item.slots = _.without(item.slots,i)
+        }
+    });
     olayout = _.reject(olayout, { i: i });
     layouts[layoutIndex]['newCounter']--;
     layouts[layoutIndex]['layout'+layoutIndex] = olayout;
