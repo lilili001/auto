@@ -39,7 +39,6 @@ export function onAddItem(that ,type,pid) {
     if(parentItem){
         parentItem.slots.push(uuid);
     }
-
     var layout = oLayout.concat({
         i:uuid,
         x: (oLayout.length * 2) % (that.state.cols || 12),
@@ -57,7 +56,6 @@ export function onAddItem(that ,type,pid) {
     layouts[index] = { ['layout'+index]: layout , newCounter,sortOrder:index };
     that.setState({layouts,currentItem:layout[0]});
     saveToLS(layouts);
-    return uuid
 }
 export function  onRemoveItem(that,layoutIndex,i) {
     stopPro(event);
@@ -73,10 +71,11 @@ export function  onRemoveItem(that,layoutIndex,i) {
     layouts[layoutIndex]['newCounter']--;
     layouts[layoutIndex]['layout'+layoutIndex] = olayout;
     that.setState({layouts,currentItem:null});
+    saveToLS(layouts);
 } 
 export function onLayoutChange(that,layout,layouts,index){
     if(event==null) return;
-    if(layout.length == 0   ) return;
+    if(layout.length == 0  || !layout[0]['attributes']  ) return;
     const {currentItem} = that.state;
 
     const laLayout = Object.assign({},currentItem,layout[0]);

@@ -9,6 +9,7 @@ import { Alert, Form, Input, Button, Checkbox, Row, Col, message, Modal, Icon , 
 import {onAddLayout, onAddItem, onLayoutChange, onRemoveItem} from "@/pages/index/actions/func";
 import {createElement} from "@/pages/index/actions/createEle";
 import ComponentList from './partials/comList';
+import {stopPro} from "@/utils";
 const { TabPane } = Tabs;
 
 class Page extends Component {
@@ -65,19 +66,23 @@ class Page extends Component {
     }
     //目标 grid
     dragEnter(ev){
-        this.setState({currentItem:JSON.parse(ev.target.getAttribute('item'))})
+         if(ev.target){
+             console.log(ev.target,ev.target.getAttribute('item'));
+             this.setState({currentItem:JSON.parse(ev.target.getAttribute('item'))})
+         }
         ev.preventDefault();
-        event.stopPropagation();
+        //stopPro(event)
         ev.target.style.background = '#d7e6f3'
     }
     dragLeave(ev){
         ev.preventDefault();
-        //ev.target.style.background = '#fff'
+        ev.target.style.background = '#fff'
     }
     drop(ev){
         ev.preventDefault();
         ev.stopPropagation();
         var obj = JSON.parse(ev.dataTransfer.getData('item'));
+        console.log(obj);
         ev.target.style.background = '#ddd';
         if(this.state.currentItem.type!=='grid'){
               message.error('禁止拖拽');
